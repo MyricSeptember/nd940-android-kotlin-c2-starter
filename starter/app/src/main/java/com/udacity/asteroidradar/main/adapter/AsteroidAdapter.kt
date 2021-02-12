@@ -5,8 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.udacity.asteroidradar.databinding.ListItemAsteroidBinding
 import com.udacity.asteroidradar.Asteroid
+import com.udacity.asteroidradar.databinding.ListItemAsteroidBinding
 
 class AsteroidAdapter(private val onClickListener: AsteroidClickListener) :
     ListAdapter<Asteroid, AsteroidAdapter.AsteroidViewHolder>(DiffCallback) {
