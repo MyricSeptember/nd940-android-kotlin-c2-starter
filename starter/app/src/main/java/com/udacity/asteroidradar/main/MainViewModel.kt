@@ -3,7 +3,10 @@ package com.udacity.asteroidradar.main
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.udacity.asteroidradar.Asteroid
+import com.udacity.asteroidradar.detail.NasaRepository
+import kotlinx.coroutines.launch
 import java.util.*
 
 class MainViewModel : ViewModel() {
@@ -12,7 +15,15 @@ class MainViewModel : ViewModel() {
     val navigateToAsteroid: LiveData<Asteroid>
         get() = _navigateToAsteroid
 
+    private val nasaRepository = NasaRepository()
+
     var testList = ArrayList<Asteroid>()
+
+    init {
+        viewModelScope.launch {
+            nasaRepository.getAsteroids()
+        }
+    }
 
     fun getTestAsteroids(): List<Asteroid> {
         testList.add(Asteroid(0, "68347 (2001 KB67)", "2020-02-08", 1.1, 1.1, 1.1, 1.1, true))
@@ -30,6 +41,4 @@ class MainViewModel : ViewModel() {
     fun displayAsteroidComplete() {
         _navigateToAsteroid.value = null
     }
-
-
 }
