@@ -1,4 +1,4 @@
-package com.udacity.asteroidradar.detail
+package com.udacity.asteroidradar.repository
 
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -33,6 +33,9 @@ class NasaRepository(private val database: AsteroidDatabase) {
         }
     }
 
+    suspend fun refreshAsteroids() {
+        getAsteroids()
+    }
 
     suspend fun getAsteroids() {
         withContext(Dispatchers.IO) {
