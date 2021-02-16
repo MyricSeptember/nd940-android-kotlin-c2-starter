@@ -8,6 +8,5 @@ data class NetworkAsteroid(
     val estimatedDiameter: Double,
     val relativeVelocity: Double,
     val distanceFromEarth: Double,
-    val isPotentiallyHazardous: Boolean,
-    val date: String
+    val isPotentiallyHazardous: Boolean
 )

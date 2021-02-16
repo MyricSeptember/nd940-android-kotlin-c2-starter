@@ -1,10 +1,15 @@
 package com.udacity.asteroidradar.detail
 
 import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Transformations
+import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.Constants
 import com.udacity.asteroidradar.Constants.API_KEY
+import com.udacity.asteroidradar.database.AsteroidDatabase
+import com.udacity.asteroidradar.database.asDatabaseModel
+import com.udacity.asteroidradar.database.asDomainModel
 import com.udacity.asteroidradar.network.NasaApi
-import com.udacity.asteroidradar.network.NasaApiService
 import com.udacity.asteroidradar.network.parseAsteroidsJsonResult
 import com.udacity.asteroidradar.util.addDaysToCurrentDate
 import com.udacity.asteroidradar.util.formattedDate
@@ -13,8 +18,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 
-class NasaRepository() {
-    var client: NasaApiService = NasaApi.retrofitService
+class NasaRepository(private val database: AsteroidDatabase) {
+
+    var client = NasaApi.retrofitService
+
+    val allAsteroids: LiveData<List<Asteroid>> =
+        Transformations.map(database.asteroidDao.getAllAsteroids()) {
+            it?.asDomainModel()
+        }
+
+    fun getFilteredAsteroids(selectedDate: String): LiveData<List<Asteroid>> {
+        return Transformations.map(database.asteroidDao.getAsteroidsOfTheDay(selectedDate)) {
+            it?.asDomainModel()
+        }
+    }
+
 
     suspend fun getAsteroids() {
         withContext(Dispatchers.IO) {
@@ -25,11 +43,12 @@ class NasaRepository() {
                 )
                 val networkAsteroidsList =
                     parseAsteroidsJsonResult(JSONObject(asteroidsStringFormat))
+
+                val databaseAsteroidsList = networkAsteroidsList.asDatabaseModel()
+                database.asteroidDao.insertAll(*databaseAsteroidsList)
             } catch (e: Exception) {
                 Log.d("ExceptionInRepo", e.toString())
             }
-
-
         }
     }
 
