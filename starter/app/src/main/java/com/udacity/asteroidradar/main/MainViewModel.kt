@@ -6,42 +6,38 @@ import com.udacity.asteroidradar.Asteroid
 import com.udacity.asteroidradar.database.getDatabase
 import com.udacity.asteroidradar.repository.NasaRepository
 import kotlinx.coroutines.launch
-import java.util.*
 
 enum class AsteroidFilter {
+    ALL_ASTEROIDS,
     ASTEROIDS_OF_THE_WEEK,
     ASTEROIDS_OF_THE_DAY
 }
 
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _navigateToAsteroid = MutableLiveData<Asteroid>()
-    val navigateToAsteroid: LiveData<Asteroid>
+    private val _navigateToAsteroid = MutableLiveData<Asteroid?>()
+    val navigateToAsteroid: LiveData<Asteroid?>
         get() = _navigateToAsteroid
 
     private val database = getDatabase(application)
 
     private val nasaRepository = NasaRepository(database)
-    private val selectedDate = MutableLiveData<String>()
-
 
     private val asteroidFilter = MutableLiveData(AsteroidFilter.ASTEROIDS_OF_THE_WEEK)
 
+    val pictureOfDay = nasaRepository.pictureOfDay
+
     val asteroids = Transformations.switchMap(asteroidFilter) {
         when (it!!) {
-            AsteroidFilter.ASTEROIDS_OF_THE_WEEK -> nasaRepository.allAsteroids
-            AsteroidFilter.ASTEROIDS_OF_THE_DAY -> {
-                selectedDate.value?.let { it1 -> nasaRepository.getFilteredAsteroids(it1) }
-            }
+            AsteroidFilter.ALL_ASTEROIDS -> nasaRepository.allAsteroids
+            AsteroidFilter.ASTEROIDS_OF_THE_WEEK -> nasaRepository.getAsteroidsOfTheWeek()
+            AsteroidFilter.ASTEROIDS_OF_THE_DAY -> nasaRepository.getAsteroidsOfTheDay()
         }
     }
 
-
-    var testList = ArrayList<Asteroid>()
-
     init {
         viewModelScope.launch {
-            nasaRepository.getAsteroids()
+            nasaRepository.refreshData()
         }
     }
 
@@ -51,6 +47,10 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun displayAsteroidComplete() {
         _navigateToAsteroid.value = null
+    }
+
+    fun setAsteroidsFilter(filter: AsteroidFilter) {
+        asteroidFilter.postValue(filter)
     }
 
     class Factory(val app: Application) : ViewModelProvider.Factory {

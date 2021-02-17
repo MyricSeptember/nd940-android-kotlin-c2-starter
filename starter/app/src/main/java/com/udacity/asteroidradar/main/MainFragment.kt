@@ -13,7 +13,9 @@ import com.udacity.asteroidradar.main.adapter.AsteroidAdapter
 class MainFragment : Fragment() {
 
     private val viewModel: MainViewModel by lazy {
-        ViewModelProvider(this,MainViewModel.Factory(requireActivity().application)).get(MainViewModel::class.java)
+        ViewModelProvider(this, MainViewModel.Factory(requireActivity().application)).get(
+            MainViewModel::class.java
+        )
     }
 
     override fun onCreateView(
@@ -49,6 +51,11 @@ class MainFragment : Fragment() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.show_week_menu -> viewModel.setAsteroidsFilter(AsteroidFilter.ASTEROIDS_OF_THE_WEEK)
+            R.id.show_today_menu -> viewModel.setAsteroidsFilter(AsteroidFilter.ASTEROIDS_OF_THE_DAY)
+            R.id.show_all_menu -> viewModel.setAsteroidsFilter(AsteroidFilter.ALL_ASTEROIDS)
+        }
         return true
     }
 }
